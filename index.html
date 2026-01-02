@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="vi" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thư viện Trò chơi AI học tập</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      height: 100%;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      background-position: 0 0, 25px 25px;
+      animation: backgroundMove 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes backgroundMove {
+      0% {
+        transform: translate(0, 0);
+      }
+      100% {
+        transform: translate(50px, 50px);
+      }
+    }
+
+    *, *::before, *::after {
+      box-sizing: inherit;
+    }
+
+    /* === HOME PAGE === */
+    .home-page {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+      color: white;
+      position: relative;
+    }
+
+    /* Background changer button */
+    .bg-changer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .bg-btn {
+      background: rgba(255, 255, 255, 0.95);
+      border: none;
+      padding: 12px 20px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1.1em;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .bg-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .bg-menu {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      display: none;
+      min-width: 280px;
+    }
+
+    .bg-menu.active {
+      display: block;
+    }
+
+    .bg-menu h4 {
+      margin: 0 0 15px 0;
+      color: #667eea;
+      font-size: 1.1em;
+    }
+
+    .bg-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .bg-option {
+      width: 100%;
+      aspect-ratio: 1;
+      border: 3px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bg-option:hover {
+      transform: scale(1.1);
+      border-color: #667eea;
+    }
+
+    .bg-option.active {
+      border-color: #667eea;
+      box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+    }
+
+    .bg-option.gradient {
+      background: var(--bg-gradient);
+    }
+
+    .bg-option.image {
+      background-size: cover;
+      background-position: center;
+    }
+
+    .header h1 {
+      font-size: 2.8em;
+      margin: 0 0 15px 0;
+      font-weight: 800;
+      text-shadow: 
+        3px 3px 6px rgba(0, 0, 0, 0.2),
+        0 0 40px rgba(255, 255, 255, 0.5);
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: titleGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+      0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+      }
+      50% {
+        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
+      }
+    }
+
+    .header p {
+      font-size: 1.15em;
+      margin: 0;
+      opacity: 0.98;
+      line-height: 1.6;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+      font-weight: 500;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    /* === GAME CARD STYLES === */
+    .game-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+      border-radius: 20px;
+      padding: 35px 25px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      position: relative;
+      overflow: hidden;
+      border: 3px solid transparent;
+      background-clip: padding-box;
+    }
+
+    .game-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.15;
+      transition: all 0.4s ease;
+      z-index: 1;
+    }
+
+    .game-card:hover .game-bg {
+      opacity: 0.25;
+      transform: scale(1.1);
+    }
+
+    .game-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 20px;
+      padding: 3px;
+      background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #4facfe);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 3;
+    }
+
+    .game-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
+      opacity: 0;
+      transition: all 0.6s ease;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .game-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+    }
+
+    .game-card:hover::before {
+      opacity: 1;
+    }
+
+    .game-card:hover::after {
+      opacity: 1;
+      top: -100%;
+      left: -100%;
+    }
+
+    .game-card:active {
+      transform: translateY(-8px) scale(0.98);
+    }
+
+    .game-icon {
+      font-size: 4.5em;
+      margin-bottom: 15px;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+      transition: all 0.3s ease;
+    }
+
+    .game-card:hover .game-icon {
+      animation: bounce 0.6s ease;
+      filter: drop-shadow(0 8px 16px rgba(102, 126, 234, 0.4));
+      transform: scale(1.1);
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      25% {
+        transform: translateY(-8px) rotate(-3deg);
+      }
+      75% {
+        transform: translateY(-8px) rotate(3deg);
+      }
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+      }
+      25% {
+        transform: translateY(-15px) scale(1.1);
+      }
+      50% {
+        transform: translateY(0) scale(0.95);
+      }
+      75% {
+        transform: translateY(-8px) scale(1.05);
+      }
+    }
+
+    .game-card:nth-child(1) .game-icon {
+      animation-delay: 0s;
+    }
+
+    .game-card:nth-child(2) .game-icon {
+      animation-delay: 0.5s;
+    }
+
+    .game-card:nth-child(3) .game-icon {
+      animation-delay: 1s;
+    }
+
+    .game-name {
+      font-size: 1.35em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0 0 10px 0;
+      line-height: 1.4;
+      transition: all 0.3s ease;
+    }
+
+    .game-card:hover .game-name {
+      transform: scale(1.05);
+      letter-spacing: 0.5px;
+    }
+
+    .game-desc {
+      font-size: 0.95em;
+      color: #666;
+      margin: 0;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    /* === GAME VIEW === */
+    .game-view {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      z-index: 2000;
+      flex-direction: column;
+    }
+
+    .game-view.active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .game-navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 25px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 10;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateX(-3px);
+    }
+
+    .back-icon {
+      font-size: 1.3em;
+      line-height: 1;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .navbar-icon {
+      font-size: 2em;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    .navbar-title {
+      font-size: 1.4em;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .game-container {
+      flex: 1;
+      width: 100%;
+      height: calc(100% - 70px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2em;
+      }
+
+      .header p {
+        font-size: 1em;
+      }
+
+      .games-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 20px;
+      }
+
+      .game-card {
+        padding: 25px 15px;
+      }
+
+      .game-icon {
+        font-size: 3em;
+      }
+
+      .game-name {
+        font-size: 1.1em;
+      }
+
+      .game-desc {
+        font-size: 0.85em;
+      }
+
+      .container {
+        padding: 30px 15px;
+      }
+
+      .game-navbar {
+        padding: 12px 15px;
+      }
+
+      .navbar-title {
+        font-size: 1.1em;
+      }
+
+      .navbar-icon {
+        font-size: 1.5em;
+      }
+
+      .back-btn {
+        padding: 8px 15px;
+        font-size: 0.9em;
+      }
+
+      .game-info {
+        gap: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .games-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .header h1 {
+        font-size: 1.6em;
+      }
+
+      .navbar-title {
+        display: none;
+      }
+
+      .game-info {
+        left: auto;
+        right: 15px;
+        transform: none;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body><!-- Background Changer -->
+  <div class="bg-changer"><button class="bg-btn" onclick="toggleBgMenu()">🎨 Đổi nền</button>
+   <div class="bg-menu" id="bgMenu">
+    <h4>Chọn màu nền</h4>
+    <div class="bg-options">
+     <div class="bg-option gradient active" style="--bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);" onclick="changeBg('gradient1')" title="Tím gradient"></div>
+     <div class="bg-option gradient" style="--bg-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" onclick="changeBg('gradient2')" title="Hồng gradient"></div>
+     <div class="bg-option gradient" style="--bg-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);" onclick="changeBg('gradient3')" title="Xanh dương gradient"></div>
+     <div class="bg-option gradient" style="--bg-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" onclick="changeBg('gradient4')" title="Xanh lá gradient"></div>
+     <div class="bg-option gradient" style="--bg-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);" onclick="changeBg('gradient5')" title="Cam hồng gradient"></div>
+     <div class="bg-option gradient" style="--bg-gradient: linear-gradient(135deg, #30cfd0 0%, #330867 100%);" onclick="changeBg('gradient6')" title="Xanh tím gradient"></div>
+    </div>
+    <h4>Hoặc chọn ảnh nền</h4>
+    <div class="bg-options">
+     <div class="bg-option image" style="background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?w=800');" onclick="changeBg('image1')" title="Gradient màu"></div>
+     <div class="bg-option image" style="background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800');" onclick="changeBg('image2')" title="Gradient xanh"></div>
+     <div class="bg-option image" style="background-image: url('https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800');" onclick="changeBg('image3')" title="Không gian"></div>
+    </div>
+   </div>
+  </div><!-- Game View -->
+  <div class="game-view" id="gameView">
+   <div class="game-navbar"><button class="back-btn" onclick="closeGame()"> <span class="back-icon">←</span> <span>Quay lại</span> </button>
+    <div class="game-info"><span class="navbar-icon" id="navbarIcon">🎮</span> <span class="navbar-title" id="navbarTitle">Trò chơi</span>
+    </div>
+   </div>
+   <div class="game-container"><iframe id="gameFrame" src=""></iframe>
+   </div>
+  </div><!-- Home Page -->
+  <div class="home-page" id="homePage">
+   <div class="container">
+    <header class="header">
+     <h1 id="page-title">Thư viện Trò chơi AI học tập</h1>
+     <p id="page-description">Khám phá các trò chơi học tập thú vị được hỗ trợ bởi AI. Chọn một trò chơi để bắt đầu!</p>
+    </header>
+    <div class="games-grid"><!-- GAME CARD START -->
+     <div class="game-card" onclick="openGame('math-quiz.html', '🧮', 'Đố vui Toán học')">
+      <div class="game-bg" style="background-image: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600');"></div>
+      <div class="game-content"><span class="game-icon">🧮</span>
+       <h2 class="game-name" id="game1-name">Đố vui Toán học</h2>
+       <p class="game-desc" id="game1-desc">Thử thách trí tuệ với các bài toán thú vị</p>
+      </div>
+     </div><!-- GAME CARD END --> <!-- GAME CARD START -->
+     <div class="game-card" onclick="openGame('word-match.html', '📝', 'Ghép chữ tiếng Việt')">
+      <div class="game-bg" style="background-image: url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600');"></div>
+      <div class="game-content"><span class="game-icon">📝</span>
+       <h2 class="game-name" id="game2-name">Ghép chữ tiếng Việt</h2>
+       <p class="game-desc" id="game2-desc">Luyện tập từ vựng và chính tả vui nhộn</p>
+      </div>
+     </div><!-- GAME CARD END --> <!-- GAME CARD START -->
+     <div class="game-card" onclick="openGame('history-memory.html', '📚', 'Luyện nhớ Lịch sử')">
+      <div class="game-bg" style="background-image: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=600');"></div>
+      <div class="game-content"><span class="game-icon">📚</span>
+       <h2 class="game-name" id="game3-name">Luyện nhớ Lịch sử</h2>
+       <p class="game-desc" id="game3-desc">Khám phá kiến thức lịch sử qua trò chơi</p>
+      </div>
+     </div><!-- GAME CARD END -->
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      page_title: "Thư viện Trò chơi AI học tập",
+      page_description: "Khám phá các trò chơi học tập thú vị được hỗ trợ bởi AI. Chọn một trò chơi để bắt đầu!",
+      game1_name: "Đố vui Toán học",
+      game1_desc: "Thử thách trí tuệ với các bài toán thú vị",
+      game2_name: "Ghép chữ tiếng Việt",
+      game2_desc: "Luyện tập từ vựng và chính tả vui nhộn",
+      game3_name: "Luyện nhớ Lịch sử",
+      game3_desc: "Khám phá kiến thức lịch sử qua trò chơi"
+    };
+
+    // Game functions
+    function openGame(gameUrl, icon, title) {
+      const gameView = document.getElementById('gameView');
+      const homePage = document.getElementById('homePage');
+      const gameFrame = document.getElementById('gameFrame');
+      const navbarIcon = document.getElementById('navbarIcon');
+      const navbarTitle = document.getElementById('navbarTitle');
+
+      // Set game info
+      navbarIcon.textContent = icon;
+      navbarTitle.textContent = title;
+      gameFrame.src = gameUrl;
+
+      // Show game view
+      homePage.style.display = 'none';
+      gameView.classList.add('active');
+    }
+
+    function closeGame() {
+      const gameView = document.getElementById('gameView');
+      const homePage = document.getElementById('homePage');
+      const gameFrame = document.getElementById('gameFrame');
+
+      // Hide game view
+      gameView.classList.remove('active');
+      homePage.style.display = 'block';
+      
+      // Clear iframe
+      gameFrame.src = '';
+    }
+
+    // Background changer functions
+    function toggleBgMenu() {
+      const menu = document.getElementById('bgMenu');
+      menu.classList.toggle('active');
+    }
+
+    function changeBg(bgType) {
+      const body = document.body;
+      const backgrounds = {
+        gradient1: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+        gradient2: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        gradient3: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        gradient4: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        gradient5: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        gradient6: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+        image1: 'url("https://images.unsplash.com/photo-1557683316-973673baf926?w=1920")',
+        image2: 'url("https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1920")',
+        image3: 'url("https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1920")'
+      };
+
+      if (bgType.startsWith('image')) {
+        body.style.background = backgrounds[bgType];
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+        body.style.backgroundAttachment = 'fixed';
+      } else {
+        body.style.background = backgrounds[bgType];
+        body.style.backgroundSize = '';
+        body.style.backgroundPosition = '';
+        body.style.backgroundAttachment = '';
+      }
+
+      // Update active state
+      document.querySelectorAll('.bg-option').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Close menu
+      document.getElementById('bgMenu').classList.remove('active');
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+      const bgChanger = document.querySelector('.bg-changer');
+      const bgMenu = document.getElementById('bgMenu');
+      if (bgChanger && !bgChanger.contains(event.target) && bgMenu.classList.contains('active')) {
+        bgMenu.classList.remove('active');
+      }
+    });
+
+    async function onConfigChange(config) {
+      const pageTitle = config.page_title || defaultConfig.page_title;
+      const pageDescription = config.page_description || defaultConfig.page_description;
+      const game1Name = config.game1_name || defaultConfig.game1_name;
+      const game1Desc = config.game1_desc || defaultConfig.game1_desc;
+      const game2Name = config.game2_name || defaultConfig.game2_name;
+      const game2Desc = config.game2_desc || defaultConfig.game2_desc;
+      const game3Name = config.game3_name || defaultConfig.game3_name;
+      const game3Desc = config.game3_desc || defaultConfig.game3_desc;
+
+      document.getElementById('page-title').textContent = pageTitle;
+      document.getElementById('page-description').textContent = pageDescription;
+      document.getElementById('game1-name').textContent = game1Name;
+      document.getElementById('game1-desc').textContent = game1Desc;
+      document.getElementById('game2-name').textContent = game2Name;
+      document.getElementById('game2-desc').textContent = game2Desc;
+      document.getElementById('game3-name').textContent = game3Name;
+      document.getElementById('game3-desc').textContent = game3Desc;
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["page_title", config.page_title || defaultConfig.page_title],
+        ["page_description", config.page_description || defaultConfig.page_description],
+        ["game1_name", config.game1_name || defaultConfig.game1_name],
+        ["game1_desc", config.game1_desc || defaultConfig.game1_desc],
+        ["game2_name", config.game2_name || defaultConfig.game2_name],
+        ["game2_desc", config.game2_desc || defaultConfig.game2_desc],
+        ["game3_name", config.game3_name || defaultConfig.game3_name],
+        ["game3_desc", config.game3_desc || defaultConfig.game3_desc]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+  </script>
+  <div class="game-card" onclick="openGame('ten-file-game.html', '🎯', 'Tên Game')">
+  </div>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b76e343760232c1',t:'MTc2NzMyMTU4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
